@@ -23,11 +23,10 @@
       "@assets/*": ["assets/*"],
       "@context/*": ["context/*"],
       "@styles/*": ["styles/*"],
-      "@api/*": ["pages/api/*"]
-
+      "@api/*": ["pages/api/*"],
+      "@graphql/*": ["graphql/*"],
+      "@hook/*": ["hook/*"]
     }
-
-
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

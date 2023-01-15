@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client";
 
 export const Subscriptions = {
   created: gql`
@@ -10,10 +10,16 @@ export const Subscriptions = {
             id
             username
           }
+          hasSeenLatestMsg
         }
         latestMsg {
-          createdAt
+          id
+          sender {
+            id
+            username
+          }
           body
+          createdAt
         }
         updatedAt
         createdAt
@@ -23,19 +29,29 @@ export const Subscriptions = {
   updated: gql`
     subscription ConversationUpdated {
       conversationUpdated {
-        id
-        participants {
-          user {
-            id
-            username
+        conversation {
+          id
+          participants {
+            user {
+              id
+              username
+            }
+            hasSeenLatestMsg
           }
-        }
-        latestMsg {
+          latestMsg {
+            id
+            sender {
+              id
+              username
+            }
+            body
+            createdAt
+          }
+          updatedAt
           createdAt
-          body
         }
-        updatedAt
-        createdAt
+        addUserIds
+        removeUserIds
       }
     }
   `,
@@ -46,4 +62,4 @@ export const Subscriptions = {
       }
     }
   `,
-}
+};

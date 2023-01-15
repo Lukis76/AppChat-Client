@@ -5,7 +5,7 @@ export const Queries = {
       conversations {
         id
         participants {
-          usr {
+          user {
             id
             username
           }

@@ -63,7 +63,7 @@ interface Conversation {
 //------------------------------------------------------
 export interface ConversationFE extends Conversation {
   participants: Array<ConversationParticipant>;
-  latestMsg: MsgFE;
+  latestMsg: MsgFE | null;
 }
 //-----------------------------------------------------
 export interface ConversationParticipant {
@@ -83,7 +83,9 @@ export interface ConversationCreatedSubscriptionData {
 }
 //----------------------------------------------------
 export interface ConversationUpdatedData {
-  conversationUpdated: Omit<ConversationFE, "latestMsg"> & { latestMsg: MsgFE };
+  conversationUpdated: {
+    conversation: Omit<ConversationFE, "latestMsg"> & { latestMsg: MsgFE };
+  };
   addUserIds: Array<string> | null;
   removeUserIds: Array<string> | null;
 }

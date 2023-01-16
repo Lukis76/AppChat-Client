@@ -1,21 +1,17 @@
 import { gql, useMutation } from "@apollo/client";
 import { operations } from "graphQL/operations";
 import { Session } from "next-auth";
-import { useRouter } from "next/router";
 import { ConversationParticipant } from "types";
 
-export const useMutationAndOnViewConversation = (session: Session, router: any) => {
+export const useViewConversation = () => {
   /////////////////////////////////////////////////////////
-  const [conversationRead] = useMutation<
-    { conversationRead: boolean },
-    { userId: string; conversationId: string }
-  >(operations.conversation.Mutations.conversationRead);
+  const [conversationRead] = useMutation<{ conversationRead: boolean }, { userId: string; conversationId: string }>(
+    operations.conversation.Mutations.conversationRead
+  );
   ///////////////////////////////////////////////////////////
   return {
-    onViewConversation: async (conversationId: string, hasSeenLatestMsg: boolean) => {
+    onViewConversation: async (conversationId: string, hasSeenLatestMsg: boolean, router: any, session: Session) => {
       //-------------------------------------------
-      console.log("holis================>>>> 👍 👍 👍 👍 🧇");
-      // const router = useRouter()
       router.push({ query: { conversationId } });
       //-------------------------------------------
       if (hasSeenLatestMsg) return;
@@ -44,22 +40,16 @@ export const useMutationAndOnViewConversation = (session: Session, router: any) 
                       id
                       username
                     }
-                    hasSeentestMsg
+                    hasSeenLatestMsg
                   }
                 }
               `,
             });
             //----------------------------------
             if (!participantsFragment) return;
-            console.log(
-              "🚀 ~ file: useMutationAndOnViewConversation.tsx:78 ~ onViewConversation: ~ participantsFragment",
-              participantsFragment
-            );
             //----------------------------------------------------------
             const participants = [...participantsFragment.participants];
-            const userParticipantIndex = participants.findIndex(
-              (p) => p.user.id === session.user.id
-            );
+            const userParticipantIndex = participants.findIndex((p) => p.user.id === session.user.id);
             //--------------------------------------
             if (userParticipantIndex === -1) return;
             //--------------------------------------

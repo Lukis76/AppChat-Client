@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 export const Subscriptions = {
   created: gql`
     subscription ConversationCreated {
-      created {
+      conversationCreated {
         id
         participants {
           user {

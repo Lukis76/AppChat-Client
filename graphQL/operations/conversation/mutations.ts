@@ -16,10 +16,16 @@ export const Mutations = {
       conversationRead(userId: $userId, conversationId: $conversationId)
     }
   `,
-  //------------------------------------------------------------------------
+  //--------------------------------------------------------
   deleteConversation: gql`
     mutation DeleteConversation($conversationId: String!) {
       deleteConversation(conversationId: $conversationId)
+    }
+  `,
+  //-------------------------------------------------------
+  leaveConversation: gql`
+    mutation LeaveConversation($conversationId: String!) {
+      leaveConversation(conversationId: $conversationId)
     }
   `,
   //--------------------------------------------------------------------------------------

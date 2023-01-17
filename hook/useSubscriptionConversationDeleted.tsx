@@ -1,34 +1,34 @@
-import { ConversationData, ConversationDeletedData} from "types";
+import { ConversationData, ConversationDeletedData } from "types";
 import { useSubscription } from "@apollo/client";
 import { operations } from "graphQL/operations";
+import { useRouter } from "next/router";
 
 export const useSubscriptionConversationDeleted = () => {
+  ///////////////////////////////////////////////////////
+  const router = useRouter();
+  ///////////////////////////////////////////////
   useSubscription<ConversationDeletedData, null>(
     //=============================================
     operations.conversation.Subscriptions.deleted,
     //=============================================
     {
-      onSubscriptionData: ({ client, subscriptionData }) => {
+      onData: ({ client, data }) => {
         //--------------------------------------------------
-        const { data } = subscriptionData;
-        //-------------------------------
-        if (!data) return;
+        if (!data.data) return;
         //-----------------------------------------------------
-        const exist = client.readQuery<ConversationData>({
+        const read = client.readQuery<ConversationData>({
           query: operations.conversation.Queries.conversations,
         });
         //-----------------------------------------------------
-        if (!exist) return;
-        //----------------------------
-        const { conversations } = exist;
-        const { id: deletedConversationId } = data.conversationDeleted;
+        if (!read) return;
         //-----------------------------------------------------------
         client.writeQuery<ConversationData>({
           query: operations.conversation.Queries.conversations,
           data: {
-            conversations: conversations.filter((c) => c.id !== deletedConversationId),
+            conversations: read.conversations.filter((c) => c.id !== data.data?.conversationDeleted.id),
           },
         });
+        router.push("/");
       },
     }
   );

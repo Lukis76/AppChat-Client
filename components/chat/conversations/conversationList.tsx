@@ -1,10 +1,11 @@
 import type { Session } from "next-auth";
 import { FC, useState } from "react";
-import { ConversationModalProps } from "./modal/conversationModal";
+import { ConversationModal } from "./modal/conversationModal";
 import { ConversationFE } from "types";
 import { ConversationItem } from "./conversationItem";
 import { signOut } from "next-auth/react";
-import { SkeletonConversationList } from "../skeleton";
+import { SkeletonConversationList } from "../skeleton"
+import { conversation } from "graphQL/operations/conversation";
 
 interface ConversationListProps {
   session: Session;
@@ -14,6 +15,7 @@ interface ConversationListProps {
 
 export const ConversationList: FC<ConversationListProps> = ({ session, conversations, conversationsLoading }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [editingConversation, setEditingConversation] = useState<ConversationFE | null>(null)
 
   const orderConversations = [...conversations].sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf());
 
@@ -28,13 +30,13 @@ export const ConversationList: FC<ConversationListProps> = ({ session, conversat
             find or start conversation
           </button>
         </div>
-        {isOpen && <ConversationModalProps session={session} close={setIsOpen} />}
+        {isOpen && <ConversationModal conversations={conversations} session={session} close={setIsOpen} editingConversation={editingConversation} />}
 
         <div className="flex flex-col justify-start items-center w-full h-full gap-2  overflow-hidden ove">
           {conversationsLoading ? (
             <SkeletonConversationList cont={14} />
           ) : (
-            orderConversations.map((c) => <ConversationItem key={c.id} session={session} conversation={c} />)
+            orderConversations.map((c) => <ConversationItem key={c.id} session={session} conversation={c} setEditingConversation={setEditingConversation} setIsOpen={setIsOpen} />)
           )}
         </div>
       </div>

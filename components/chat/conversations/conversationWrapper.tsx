@@ -3,8 +3,8 @@ import type { Session } from "next-auth";
 import { ConversationList } from "./conversationList";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { operations } from "graphQL/operations";
-import { ConversationCreatedSubscriptionData, ConversationData, ConversationParticipant, ConversationUpdatedData, MsgsData } from "types";
-// import { useSubscriptionConversationDeleted } from "@hook/useSubscriptionConversationDeleted";
+import { ConversationCreatedSubscriptionData, ConversationData, ConversationUpdatedData, ConversationDeletedData, MsgsData } from "types";
+import { useSubscriptionConversationDeleted } from "@hook/useSubscriptionConversationDeleted";
 import { useSubscription } from "@apollo/client";
 import { useRouter } from "next/router";
 import { useViewConversation } from "@hook/useMutationAndOnViewConversation";
@@ -14,7 +14,7 @@ interface ConversationWrapperProps {
 }
 
 export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) => {
-  /////////////////////////////
+  //--------------------------------------------------------------------------------
   const router = useRouter();
   const conversationId = router?.query?.conversationId as string;
   ///////////////////////// Query ///////////////////////////////
@@ -30,22 +30,22 @@ export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) =
   const { onViewConversation } = useViewConversation();
   ///////////////////////////////////////////////////////
   useSubscription<ConversationUpdatedData, null>(
-    //--------------------------------------------
+    //////////////////////////////////////////////
     operations.conversation.Subscriptions.updated,
-    //--------------------------------------------
+    //////////////////////////////////////////////
     {
       onData: ({ client, data }) => {
         console.log("data : roket: =>>>>>", data.data);
-        //---------------------------------------
+        //=============================================
         if (!data.data) return;
-        //   //--------------------------------------------------------------------------
+        //===================================================================
         const { addUserIds, removeUserIds, conversationUpdated } = data.data;
         const { id: updateConversationId, latestMsg } = conversationUpdated.conversation;
-        //   //===============================================================================
+        //===============================================================================
         // if (removeUserIds && removeUserIds.length) {
         //     //----------------------------------------------------------------
         // const isRemoved = removeUserIds.find((id) => id === session.user.id);
-        //     //================================================================
+        //     //----------------------------------------------------------------
         // if (isRemoved) {
         //   const dataConversation = client.readQuery<ConversationData>({
         //     query: operations.conversation.Queries.conversations,
@@ -66,19 +66,19 @@ export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) =
         //       //------------------------------------------------------------
         if (conversationId === updateConversationId) {
           // router.replace(typeof "http://localhost:3000" === "string" ? "http://localhost:3000" : "");
-          onViewConversation(conversationId, false, router, session);
+          onViewConversation(conversationId, false, session);
         }
         //       //---------
-        return;
+        // return;
         //       //---------
         // }
         //     //=============
       },
       //   //============================================================
       //   if (addUserIds && addUserIds.length) {
-      //     //---------------------------------------------------------
+      //     //------------------------------------------------------------
       //     const isAdd = addUserIds.find((id) => id === session.user.id);
-      //     //==============================================================
+      //     //------------------------------------------------------------
       //     if (isAdd) {
       //       const dataConversation = client.readQuery<ConversationData>({
       //         query: operations.conversation.Queries.conversations,
@@ -128,8 +128,7 @@ export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) =
     }
   );
   // Subscription Deleted Conversation
-  // useSubscriptionConversationDeleted()
-
+  useSubscriptionConversationDeleted();
   ///////////////////////////////////////////////
   useEffect(() => {
     subscribeToMore({
@@ -152,7 +151,6 @@ export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) =
         session={session}
         conversations={conversationsData?.conversations || []}
         conversationsLoading={conversationsLoading}
-        // onViewConversation={onViewConversation}
       />
     </div>
   );

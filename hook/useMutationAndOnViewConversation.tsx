@@ -1,16 +1,18 @@
 import { gql, useMutation } from "@apollo/client";
 import { operations } from "graphQL/operations";
 import { Session } from "next-auth";
+import { useRouter } from "next/router";
 import { ConversationParticipant } from "types";
 
 export const useViewConversation = () => {
+  const router = useRouter();
   /////////////////////////////////////////////////////////
   const [conversationRead] = useMutation<{ conversationRead: boolean }, { userId: string; conversationId: string }>(
     operations.conversation.Mutations.conversationRead
   );
   ///////////////////////////////////////////////////////////
   return {
-    onViewConversation: async (conversationId: string, hasSeenLatestMsg: boolean, router: any, session: Session) => {
+    onViewConversation: async (conversationId: string, hasSeenLatestMsg: boolean, session: Session) => {
       //-------------------------------------------
       router.push({ query: { conversationId } });
       //-------------------------------------------

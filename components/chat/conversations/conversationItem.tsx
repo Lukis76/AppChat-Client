@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
 import { ConversationFE } from "types";
 import Image from "next/image";
 import { formatUsersName } from "@utils/helpFunctions";
@@ -6,15 +6,19 @@ import ReactTimeAgo from "react-time-ago";
 import { useRouter } from "next/router";
 import { Session } from "next-auth";
 import { useViewConversation } from "@hook/useMutationAndOnViewConversation";
+import { ContextMenu } from "@components/chat/conversations/modal/contextMenu";
 
 interface ConversationItemProps {
   conversation: ConversationFE;
   session: Session;
+  setEditingConversation: Dispatch<SetStateAction<ConversationFE | null>>;
+  setIsOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export const ConversationItem: FC<ConversationItemProps> = ({ conversation, session }) => {
+export const ConversationItem: FC<ConversationItemProps> = ({ conversation, session, setEditingConversation, setIsOpen }) => {
   const router = useRouter();
   const conversationId = router?.query?.conversationId as string;
+  const [contextMenu, setContextMenu] = useState<boolean>(false);
   const customImg = "";
   const { onViewConversation } = useViewConversation();
 
@@ -22,24 +26,35 @@ export const ConversationItem: FC<ConversationItemProps> = ({ conversation, sess
     return Boolean(conversation.participants.find((p) => p.user.id === session.user.id)?.hasSeenLatestMsg);
   };
 
-  const handleClick = (event: React.MouseEvent) => {
-    if (event.type === "click") {
-      onViewConversation(conversation.id, getUserParticipant(conversation), router, session);
-    } else if (event.type === "contextmenu") {
-      event.preventDefault();
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.type === "click") {
+      onViewConversation(conversation.id, getUserParticipant(conversation), session);
+    } else if (e.type === "contextmenu") {
+      e.preventDefault();
+      setContextMenu(true);
     }
   };
 
   return (
     <div
-      className={`flex flex-row justify-between items-center w-full pr-4 pl-2 py-2 bg-zinc-700 hover:bg-zinc-600  text-zinc-300 rounded-lg ease duration-75 cursor-pointer gap-4 ${
+      className={`relative flex flex-row justify-between items-center w-full pr-4 pl-2 py-2 bg-zinc-700 hover:bg-zinc-600  text-zinc-300 rounded-lg ease duration-75 cursor-pointer gap-4 ${
         conversation.id === conversationId && "bg-zinc-600"
       }`}
       onClick={(e) => {
-        router.push({ query: { conversationId: conversation.id } });
+        // router.push({ query: { conversationId: conversation.id } });
         handleClick(e);
       }}
+      onContextMenu={handleClick}
     >
+      {contextMenu && (
+        <ContextMenu
+          close={setContextMenu}
+          conversationId={conversation.id}
+          setEditingConversation={setEditingConversation}
+          conversation={conversation}
+          setIsOpen={setIsOpen}
+        />
+      )}
       <Image
         src={
           customImg ||
@@ -59,7 +74,7 @@ export const ConversationItem: FC<ConversationItemProps> = ({ conversation, sess
           </span>
         </div>
         <div className=" flex flex-row justify-between items-center w-full">
-          <span className="truncate self-start max-w-[12.5rem]">{conversation?.latestMsg?.body}</span>
+          <span className="truncate text-xs max-w-[12.5rem]">{conversation?.latestMsg?.body}</span>
           {getUserParticipant(conversation) === false && (
             <span className="flex self-end w-4 h-4 rounded-full animate-pulse opacity-0 bg-green-500" />
           )}

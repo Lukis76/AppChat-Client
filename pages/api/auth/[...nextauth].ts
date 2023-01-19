@@ -1,27 +1,13 @@
-import NextAuth, { Session, User } from 'next-auth'
-import type { NextAuthOptions } from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
-import prisma from '@lib/prismadb'
-import { JWT } from 'next-auth/jwt'
-import { ServerSession } from 'mongodb'
-import { AdapterUser } from 'next-auth/adapters'
-
-// export interface session {
-//   user?: {
-//     id?: string
-//     name?: string
-//     email?: string
-//     image?: string
-//     username?: string
-//     profilename?: string
-//   }
-//   expires: string
-// }
+import NextAuth, { Session, User } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import prisma from "@lib/prismadb";
+import { JWT } from "next-auth/jwt";
 
 interface client {
-  clientId: string
-  clientSecret: string
+  clientId: string;
+  clientSecret: string;
 }
 export const authOptions: NextAuthOptions = {
   // your configs
@@ -35,34 +21,34 @@ export const authOptions: NextAuthOptions = {
     } as client),
   ],
 
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: "122a918b879a04mn8331c0795f435d084",
 
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
   pages: {
-    signIn: '/auth',
-    signOut: '/auth',
+    signIn: "/auth",
+    signOut: "/auth",
   },
   callbacks: {
     // @ts-ignore
     session: async ({ session, token }: { session: Session; token: JWT }) => {
       const usuario = await prisma.user.findUnique({
         where: {
-          id: token.sub,
+          id: token?.sub,
         },
-      })
+      });
       if (usuario) {
         return {
           ...session,
           user: { ...usuario },
-        }
+        };
       } else {
-        session.user.id = token.sub
-        return session
+        session.user.id = token?.sub;
+        return session;
       }
     },
   },
-}
+};
 
-export default NextAuth(authOptions)
+export default NextAuth(authOptions);

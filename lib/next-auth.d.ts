@@ -8,7 +8,11 @@ declare module "next-auth" {
   }
 
   interface User {
-    id: string;
+    id?: string;
     username: string;
+    phone?: string;
+    trabajo?: string;
+    skills?: string[];
+    nacionalidad?: string;
   }
 }

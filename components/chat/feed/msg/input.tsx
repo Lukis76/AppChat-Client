@@ -26,7 +26,7 @@ export const Input: FC<InputProps> = ({ session, conversationId }) => {
     setMsg("");
     try {
       // send Msg Mutation
-      const { id: senderId } = session?.user;
+      const senderId = session?.user?.id as string;
       const newMsgId = ObjectID().toHexString();
       const newMsg: SendMsgVar = {
         id: newMsgId,
@@ -57,7 +57,7 @@ export const Input: FC<InputProps> = ({ session, conversationId }) => {
                 {
                   ...newMsg,
                   sender: {
-                    id: session.user.id,
+                    id: session?.user?.id as string,
                     username: session.user.username,
                   },
                   createdAt: new Date(Date.now()),

@@ -5,4 +5,4 @@ const Prerfil = () => {
   )
 }
 
-export default Prerfil1
+export default Prerfil

@@ -22,7 +22,7 @@ export const useViewConversation = () => {
         await conversationRead({
           //---------------------------
           variables: {
-            userId: session.user.id,
+            userId: session.user.id as string,
             conversationId,
           },
           //---------------------------

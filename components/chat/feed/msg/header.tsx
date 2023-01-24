@@ -1,20 +1,20 @@
 import SvgBack from "@assets/svg/svgBack";
-import type { Session } from "next-auth";
+import { authUserContext } from "@context/authContext";
 import { useRouter } from "next/router";
-import { FC } from "react";
-import { ConversationFE } from "types";
+import { FC, useContext } from "react";
+import { ConversationFE, User } from "types";
 
 interface HeaderProps {
-  session: Session;
   conversation: ConversationFE
 }
 
-export const Header: FC<HeaderProps> = ({ session, conversation }) => {
+export const Header: FC<HeaderProps> = ({ conversation }) => {
   const router = useRouter();
 
+  const user = useContext(authUserContext).user as User | null;
 
   const usersparticipantsNames = conversation?.participants
-    .filter((u) => u.user.id != session.user.id)
+    .filter((u) => u.user.id != user?.id)
     .map((u) => u.user.username)
     .join(", ");
 

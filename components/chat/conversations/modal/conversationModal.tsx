@@ -1,244 +1,291 @@
-import { useLazyQuery, useMutation } from "@apollo/client";
-import { operations } from "graphQL/operations";
-import { Dispatch, FC, FormEvent, SetStateAction, useEffect, useState } from "react";
-import {
-  ConversationFE,
-  CreateConversationData,
-  CreateConversationInput,
-  SearchUser,
-  SearchUsersData,
-  SearchUsersInput,
-  ConversationParticipant,
-} from "types";
-import { UserSearchList } from "./useSearchList";
 import { Participants } from "./participants";
-import { toast } from "react-hot-toast";
+import { UserSearchList } from "./useSearchList";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { SvgLoading } from "@assets/svg";
-import { Session } from "next-auth";
-import { NextRouter, useRouter } from "next/router";
 import { useViewConversation } from "@hook/index";
+import { operations } from "graphQL/operations";
+import { ErrorMessage, Message } from "graphql-ws";
+import { NextRouter, useRouter } from "next/router";
+import {
+	Dispatch,
+	FC,
+	FormEvent,
+	SetStateAction,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
+import { toast } from "react-hot-toast";
+import {
+	ConversationFE,
+	ConversationParticipant,
+	CreateConversationData,
+	CreateConversationInput,
+	SearchUser,
+	SearchUsersData,
+	SearchUsersInput,
+  User
+} from "types";
+import { authUserContext } from "@context/authContext";
 
 interface ConversationModalProps {
-  close: Dispatch<SetStateAction<boolean>>;
-  session: Session;
-  conversations: Array<ConversationFE>;
-  editingConversation: ConversationFE | null;
+	close: Dispatch<SetStateAction<boolean>>;
+	conversations: Array<ConversationFE>;
+	editingConversation: ConversationFE | null;
 }
 
-export const ConversationModal: FC<ConversationModalProps> = ({ close, session, conversations, editingConversation }) => {
-  //----------------------------------------------------------------------------------------
-  const router: NextRouter = useRouter();
-  const userId = session?.user?.id as string;
-  const [username, setUsername] = useState<string>("");
-  const [participants, setParticipants] = useState<Array<SearchUser>>([]);
-  const [existConversation, setExistConversation] = useState<ConversationFE | null>(null);
-  const { onViewConversation } = useViewConversation();
-  //--------------------------------------------------------------------------------------------------------------------------
-  const [searchUsers, { data: dataSearch, loading: loadingSearch, error: searchUserError }] = useLazyQuery<
-    SearchUsersData,
-    SearchUsersInput
-  >(operations.user.Queries.searchUsers);
-  //---------------------------------------------------------------------------------------------------------------------------------
-  const [createConversation, { loading: loadingCreateConversation }] = useMutation<CreateConversationData, CreateConversationInput>(
-    operations.conversation.Mutations.createConversation
-  );
-  //----------------------------------------------------------------------------------------------------------------------------------------
-  const [updateParticipants, {}] = useMutation<{ updateParticipants: boolean }, { conversationId: string; participantIds: Array<string> }>(
-    operations.conversation.Mutations.updateParticipants
-  );
-  const onSubmit = () => {
-    console.log("dentro del on submit |??|?| => ", !participants.length);
-    if (!participants.length) return;
+export const ConversationModal: FC<ConversationModalProps> = ({
+	close,
+	conversations,
+	editingConversation,
+}) => {
+	//----------------------------------------------------------------------------------------
 
-    const participantIds = participants.map((p) => p.id);
-    console.log("destro del onsubmit ==> ", participantIds);
+  const user = useContext(authUserContext).user as User | null;
+	const router: NextRouter = useRouter();
+	const userId = user?.id;
+	const [username, setUsername] = useState<string>("");
+	const [participants, setParticipants] = useState<Array<SearchUser>>([]);
+	const [existConversation, setExistConversation] =
+		useState<ConversationFE | null>(null);
+	const { onViewConversation } = useViewConversation();
+	//--------------------------------------------------------------------------------------------------------------------------
+	const [
+		searchUsers,
+		{ data: dataSearch, loading: loadingSearch, error: searchUserError },
+	] = useLazyQuery<SearchUsersData, SearchUsersInput>(
+		operations.user.Queries.searchUsers,
+	);
+	//---------------------------------------------------------------------------------------------------------------------------------
+	const [createConversation, { loading: loadingCreateConversation }] =
+		useMutation<CreateConversationData, CreateConversationInput>(
+			operations.conversation.Mutations.createConversation,
+		);
+	//----------------------------------------------------------------------------------------------------------------------------------------
+	const [updateParticipants] = useMutation<
+		{ updateParticipants: boolean },
+		{ conversationId: string; participantIds: Array<string> }
+	>(operations.conversation.Mutations.updateParticipants);
+	const onSubmit = () => {
+		console.log("dentro del on submit |??|?| => ", !participants.length);
+		if (!participants.length) return;
 
-    const exist = findExistConversation(participantIds);
+		const participantIds = participants.map((p) => p.id);
+		console.log("destro del onsubmit ==> ", participantIds);
 
-    console.log("dentro del onsubmit =>", exist);
+		const exist = findExistConversation(participantIds);
 
-    if (exist) {
-      toast("Conversation already exists");
-      setExistConversation(exist);
-      return;
-    }
-    console.log("dentro on Submit => fin ", editingConversation);
+		console.log("dentro del onsubmit =>", exist);
 
-    editingConversation ? onUpdateConversation(editingConversation) : onCreateConversation();
-  };
-  //-----------------------------------------------------------------------------
-  const findExistConversation = (participantIds: Array<string>) => {
-    let existConversation: ConversationFE | null = null;
+		if (exist) {
+			toast("Conversation already exists");
+			setExistConversation(exist);
+			return;
+		}
+		console.log("dentro on Submit => fin ", editingConversation);
 
-    for (const conversation of conversations) {
-      const addParticipants = conversation.participants.filter((p) => p.user.id !== userId);
+		editingConversation
+			? onUpdateConversation(editingConversation)
+			: onCreateConversation();
+	};
+	//-----------------------------------------------------------------------------
+	const findExistConversation = (participantIds: Array<string>) => {
+		let existConversation: ConversationFE | null = null;
 
-      if (addParticipants.length !== participantIds.length) continue;
+		for (const conversation of conversations) {
+			const addParticipants = conversation.participants.filter(
+				(p) => p.user.id !== userId,
+			);
 
-      let allMathchingParticipants: boolean = false;
+			if (addParticipants.length !== participantIds.length) continue;
 
-      for (const participant of addParticipants) {
-        const foundParticipant = participantIds.find((p) => p === participant.user.id);
+			let allMathchingParticipants: boolean = false;
 
-        if (!foundParticipant) {
-          allMathchingParticipants = false;
-          break;
-        }
+			for (const participant of addParticipants) {
+				const foundParticipant = participantIds.find(
+					(p) => p === participant.user.id,
+				);
 
-        allMathchingParticipants = true;
-      }
-      if (allMathchingParticipants) {
-        existConversation = conversation;
-      }
-    }
-    return existConversation;
-  };
-  //---------------------------------------------------
-  const handleSubmitSearch = async (e: FormEvent) => {
-    e.preventDefault();
-    searchUsers({ variables: { username } });
-  };
-  //---------------------------------------------------
-  const onCreateConversation = async () => {
-    const participantIds = [userId, ...participants.map((p) => p.id)];
-    console.log("holis ======> :))))");
-    try {
-      const { data, errors } = await createConversation({
-        variables: { participantIds },
-      });
+				if (!foundParticipant) {
+					allMathchingParticipants = false;
+					break;
+				}
 
-      if (!data?.createConversation || errors) {
-        throw new Error("Filed to create conversation");
-      }
+				allMathchingParticipants = true;
+			}
+			if (allMathchingParticipants) {
+				existConversation = conversation;
+			}
+		}
+		return existConversation;
+	};
+	//---------------------------------------------------
+	const handleSubmitSearch = async (e: FormEvent) => {
+		e.preventDefault();
+		searchUsers({ variables: { username } });
+	};
+	//---------------------------------------------------
+	const onCreateConversation = async () => {
+		const participantIds = [userId, ...participants.map((p) => p.id)] as [string];
+		console.log("holis ======> :))))");
+		try {
+			const { data, errors } = await createConversation({
+				variables: { participantIds },
+			});
 
-      const { conversationId } = data?.createConversation;
+			if (!data?.createConversation || errors) {
+				throw new Error("Filed to create conversation");
+			}
 
-      router.push({
-        query: { conversationId },
-      });
+			const { conversationId } = data?.createConversation;
 
-      setParticipants([]);
-      setUsername("");
-      close((state) => !state);
-    } catch (err: any) {
-      console.log("on created session room => ", err);
-      toast.error(err?.message);
-    }
-  };
-  //------------------------------------------------------------
-  const onUpdateConversation = async (conversation: ConversationFE) => {
-    const participantIds = participants.map((p) => p.id);
-    try {
-      const { data, errors } = await updateParticipants({
-        variables: {
-          conversationId: conversation.id,
-          participantIds,
-        },
-      });
+			router.push({
+				query: { conversationId },
+			});
 
-      if (!data?.updateParticipants || errors) {
-        throw new Error("Failed updating participants");
-      }
+			setParticipants([]);
+			setUsername("");
+			close((state) => !state);
+		} catch (err) {
+			console.log("on created session room => ", err);
+			if (err instanceof Error) {
+				toast.error(err.message);
+			}
+		}
+	};
+	//------------------------------------------------------------
+	const onUpdateConversation = async (conversation: ConversationFE) => {
+		const participantIds = participants.map((p) => p.id);
+		try {
+			const { data, errors } = await updateParticipants({
+				variables: {
+					conversationId: conversation.id,
+					participantIds,
+				},
+			});
 
-      setParticipants([]);
-      setUsername("");
-      close((state) => !state);
-    } catch (err) {
-      console.log("On Updated Conversation to participants Error", err);
-      toast.error("Failed to updated Participants");
-    }
-  };
-  //-----------------------------------------------
+			if (!data?.updateParticipants || errors) {
+				throw new Error("Failed updating participants");
+			}
 
-  const addParticipant = (user: SearchUser) => {
-    setParticipants((state) => [...state, user]);
-    setUsername("");
-  };
-  //-------------------------------------------------------------------
+			setParticipants([]);
+			setUsername("");
+			close((state) => !state);
+		} catch (err) {
+			console.log("On Updated Conversation to participants Error", err);
+			toast.error("Failed to updated Participants");
+		}
+	};
+	//-----------------------------------------------
 
-  const removeParticipant = (userId: string) => {
-    setParticipants((state) => state.filter((u) => u.id !== userId));
-  };
-  //-------------------------------------------------------------------
-  const onConversationClick = () => {
-    if (!existConversation) return;
+	const addParticipant = (user: SearchUser) => {
+		setParticipants((state) => [...state, user]);
+		setUsername("");
+	};
+	//-------------------------------------------------------------------
 
-    const { hasSeenLatestMsg } = existConversation.participants.find((p) => p.user.id === userId) as ConversationParticipant;
+	const removeParticipant = (userId: string) => {
+		setParticipants((state) => state.filter((u) => u.id !== userId));
+	};
+	//-------------------------------------------------------------------
+	const onConversationClick = () => {
+		if (!existConversation) return;
 
-    onViewConversation(existConversation.id, hasSeenLatestMsg, session);
-    close((state) => !state);
-  };
-  //-----------------------------------------------------------------------
-  useEffect(() => {
-    if (editingConversation) {
-      setParticipants(editingConversation.participants.map((p) => p.user));
-      return;
-    }
-  }, [editingConversation]);
-  //-----------------------------------------------------------------------
-  if (searchUserError) {
-    toast.error("Error searching for users");
-    return null;
-  }
-  //-----------------------------------------------------------------------
+		const { hasSeenLatestMsg } = existConversation.participants.find(
+			(p) => p.user.id === userId,
+		) as ConversationParticipant;
 
-  return (
-    <div className="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#00000088] ease duration-200 z-50">
-      <div
-        className="fixed w-screen h-screen top-0 left-0"
-        onClick={() => {
-          setUsername("");
-          setParticipants([]);
-          close((state) => !state);
-        }}
-      />
-      <section className="relative flex flex-col justify-start items-center bg-zinc-900 text-zinc-300 max-w-2xl px-4 py-6 rounded-lg gap-4 z-20">
-        <button
-          className="bg-red-500 opacity-70 p-2 rounded-lg absolute top-2 right-2 hover:opacity-100 ease duration-75"
-          onClick={() => {
-            setUsername("");
-            setParticipants([]);
-            close((state) => !state);
-          }}
-        >
-          X
-        </button>
-        <h2 className="text-center font-semibold text-3xl w-full">holisdffjeiu</h2>
-        <form onSubmit={handleSubmitSearch} className="flex flex-col justify-start items-center gap-2">
-          <input
-            type="text"
-            value={username}
-            placeholder="insert"
-            onChange={(e) => setUsername(e.target.value)}
-            className="px-2 py-1 rounded-md focus:bg-zinc-800 bg-zinc-900 border-zinc-700 border-2 text-lg w-full"
-          />
-          <button
-            type="submit"
-            disabled={!username}
-            className="flex justify-center items-center bg-zinc-800 w-full py-1 px-4 text-lg rounded-md disabled:opacity-30 hover:bg-zinc-700 ease duration-100"
-          >
-            {loadingSearch ? <SvgLoading size={24} /> : "search"}
-          </button>
-        </form>
-        {dataSearch?.searchUsers && <UserSearchList users={dataSearch?.searchUsers} addParticipant={addParticipant} />}
-        {participants.length !== 0 && (
-          <>
-            {participants.length > 2 ? (
-              <Participants participants={participants} removeParticipant={removeParticipant} />
-            ) : (
-              <p>the minimum number of participants is two </p>
-            )}
-            <div className="flex justify-center items-center w-full">
-              <button
-                className="flex justify-center items-center text-center text-lg font-medium rounded-lg px-4 py-1 bg-blue-400 w-full"
-                onClick={onSubmit}
-              >
-                {loadingCreateConversation ? <SvgLoading size={24} /> : "Create room"}
-              </button>
-            </div>
-          </>
-        )}
-      </section>
-    </div>
-  );
+		onViewConversation(existConversation.id, hasSeenLatestMsg, user);
+		close((state) => !state);
+	};
+	//-----------------------------------------------------------------------
+	useEffect(() => {
+		if (editingConversation) {
+			setParticipants(editingConversation.participants.map((p) => p.user));
+			return;
+		}
+	}, [editingConversation]);
+	//-----------------------------------------------------------------------
+	if (searchUserError) {
+		toast.error("Error searching for users");
+		return null;
+	}
+	//-----------------------------------------------------------------------
+
+	return (
+		<div className="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#00000088] ease duration-200 z-50">
+			<button
+				className="fixed w-screen h-screen top-0 left-0"
+				onClick={() => {
+					setUsername("");
+					setParticipants([]);
+					close((state) => !state);
+				}}
+			/>
+			<section className="relative flex flex-col justify-start items-center bg-zinc-900 text-zinc-300 max-w-2xl px-4 py-6 rounded-lg gap-4 z-20">
+				<button
+					className="bg-red-500 opacity-70 p-2 rounded-lg absolute top-2 right-2 hover:opacity-100 ease duration-75"
+					onClick={() => {
+						setUsername("");
+						setParticipants([]);
+						close((state) => !state);
+					}}
+				>
+					X
+				</button>
+				<h2 className="text-center font-semibold text-3xl w-full">
+					holisdffjeiu
+				</h2>
+				<form
+					onSubmit={handleSubmitSearch}
+					className="flex flex-col justify-start items-center gap-2"
+				>
+					<input
+						type="text"
+						value={username}
+						placeholder="insert"
+						onChange={(e) => setUsername(e.target.value)}
+						className="px-2 py-1 rounded-md focus:bg-zinc-800 bg-zinc-900 border-zinc-700 border-2 text-lg w-full"
+					/>
+					<button
+						type="submit"
+						disabled={!username}
+						className="flex justify-center items-center bg-zinc-800 w-full py-1 px-4 text-lg rounded-md disabled:opacity-30 hover:bg-zinc-700 ease duration-100"
+					>
+						{loadingSearch ? <SvgLoading size={24} /> : "search"}
+					</button>
+				</form>
+				{dataSearch?.searchUsers && (
+					<UserSearchList
+						users={dataSearch?.searchUsers}
+						addParticipant={addParticipant}
+					/>
+				)}
+				{participants.length !== 0 && (
+					<>
+						{participants.length > 2 ? (
+							<Participants
+								participants={participants}
+								removeParticipant={removeParticipant}
+							/>
+						) : (
+							<p>the minimum number of participants is two </p>
+						)}
+						<div className="flex justify-center items-center w-full">
+							<button
+								className="flex justify-center items-center text-center text-lg font-medium rounded-lg px-4 py-1 bg-blue-400 w-full"
+								onClick={onSubmit}
+							>
+								{loadingCreateConversation ? (
+									<SvgLoading size={24} />
+								) : (
+									"Create room"
+								)}
+							</button>
+						</div>
+					</>
+				)}
+			</section>
+		</div>
+	);
 };

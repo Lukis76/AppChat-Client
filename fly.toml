@@ -1,6 +1,6 @@
-# fly.toml file generated for chatappgraphql on 2023-01-19T18:54:55-03:00
+# fly.toml file generated for clientchat on 2023-01-22T14:02:39-03:00
 
-app = "chatappgraphql"
+app = "clientchat"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []

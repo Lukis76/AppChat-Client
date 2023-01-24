@@ -11,6 +11,7 @@ interface client {
 }
 export const authOptions: NextAuthOptions = {
   // your configs
+ // ts-ignore 
 
   adapter: PrismaAdapter(prisma),
 

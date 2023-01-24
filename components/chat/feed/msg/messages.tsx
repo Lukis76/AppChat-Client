@@ -1,17 +1,22 @@
 import { useQuery } from "@apollo/client";
 import { SkeletonMsgsList } from "@components/chat/skeleton";
+import { authUserContext } from "@context/authContext";
 import { operations } from "graphQL/operations";
-import { Session } from "next-auth";
-import { FC, useEffect } from "react";
+import { FC, useContext, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { MsgsData, MsgsVar, MsgSubscriptionData } from "types";
+import { MsgsData, MsgsVar, MsgSubscriptionData, User } from "types";
 import { MessageItem } from "./messageItem";
+
+
 interface MessagesProps {
-  session: Session;
   conversationId: string;
 }
 
-export const Messages: FC<MessagesProps> = ({ conversationId, session }) => {
+export const Messages: FC<MessagesProps> = ({ conversationId }) => {
+
+
+  const user = useContext(authUserContext).user as User | null;
+
   const { data, loading, error, subscribeToMore } = useQuery<MsgsData, MsgsVar>(
     operations.message.Queries.msgs,
     {
@@ -33,7 +38,7 @@ export const Messages: FC<MessagesProps> = ({ conversationId, session }) => {
         const newMsg = subscriptionData.data.msgSend;
 
         return Object.assign({}, prev, {
-          msgs: newMsg.sender.id === session.user.id ? prev.msgs : [newMsg, ...prev.msgs],
+          msgs: newMsg.sender.id === user?.id ? prev.msgs : [newMsg, ...prev.msgs],
         });
       },
     });
@@ -52,7 +57,7 @@ export const Messages: FC<MessagesProps> = ({ conversationId, session }) => {
       {data?.msgs && (
         <div className="flex flex-col-reverse justify-start w-full px-2 h-full  scrollbar-thin py-4 scrollbar-track-zinc-800 scrollbar-thumb-blue-500 scrollbar-thumb-rounded-full">
           {data.msgs.map((msg) => (
-            <MessageItem key={msg.id} msg={msg} sendByMe={msg?.sender?.id === session?.user?.id} />
+            <MessageItem key={msg.id} msg={msg} sendByMe={msg?.sender?.id === user?.id} />
           ))}
         </div>
       )}

@@ -1,15 +1,16 @@
-import { FC, useState } from "react";
+import { FC, useContext, useState } from "react";
 
 import Image from "next/image";
-import { Session } from "next-auth";
+import { authUserContext } from "@context/authContext";
+import { User } from 'types'
 
-interface ProfileProps {
-  session: Session;
-}
 
-export const Profile: FC<ProfileProps> = ({ session }) => {
+export const Profile: FC = () => {
+
+  const user = useContext(authUserContext).user as User | null;
+
   const [open, setOpen] = useState(false);
-  const [dataUser, setDataUser] = useState(session?.user);
+  const [dataUser, setDataUser] = useState(user);
   console.log("comomeoooooooooo==>>> ", dataUser);
 
   return (
@@ -31,7 +32,7 @@ export const Profile: FC<ProfileProps> = ({ session }) => {
         </div>
         <div>
           <Image
-            src={`${dataUser.image || "https://avatars0.githubusercontent.com/u/33479836?v=4"}`}
+            src={`${dataUser?.image || "https://avatars0.githubusercontent.com/u/33479836?v=4"}`}
             width={280}
             height={280}
             quality={30}
@@ -40,15 +41,15 @@ export const Profile: FC<ProfileProps> = ({ session }) => {
           />
         </div>
         <hr className="bg-white w-full max-w-[90%] my-10" />
-        <section className="text-white text-lg flex flex-col justify-start items-start w-full px-6 gap-2">
-          {dataUser?.username && <p className="justify-start items-center truncate w-full">user Name : {dataUser.username}</p>}
-          {dataUser?.name && <p className="justify-start items-center truncate w-full">Name : {dataUser.name}</p>}
-          {dataUser?.phone && <p className="justify-start items-center truncate w-full">Phone : {dataUser.phone}</p>}
-          {dataUser?.email && <p className="justify-start items-center truncate w-full">Email : {dataUser.email}</p>}
-          {dataUser?.trabajo && <p className="justify-start items-center truncate w-full">Trabajo : {dataUser.trabajo}</p>}
-          {dataUser?.skills && <p className="justify-start items-center truncate w-full">Skills : {dataUser.skills.join(", ")}</p>}
-          {dataUser?.nacionalidad && <p className="justify-start items-center truncate w-full">Nacionalidad : {dataUser.nacionalidad}</p>}
-        </section>
+        {/* <section className="text-white text-lg flex flex-col justify-start items-start w-full px-6 gap-2"> */}
+        {/*   {dataUser?.username && <p className="justify-start items-center truncate w-full">user Name : {dataUser.username}</p>} */}
+        {/*   {dataUser?.name && <p className="justify-start items-center truncate w-full">Name : {dataUser.name}</p>} */}
+        {/*   {dataUser?.phone && <p className="justify-start items-center truncate w-full">Phone : {dataUser.phone}</p>} */}
+        {/*   {dataUser?.email && <p className="justify-start items-center truncate w-full">Email : {dataUser.email}</p>} */}
+        {/*   {dataUser?.trabajo && <p className="justify-start items-center truncate w-full">Trabajo : {dataUser.trabajo}</p>} */}
+        {/*   {dataUser?.skills && <p className="justify-start items-center truncate w-full">Skills : {dataUser.skills.join(", ")}</p>} */}
+        {/*   {dataUser?.nacionalidad && <p className="justify-start items-center truncate w-full">Nacionalidad : {dataUser.nacionalidad}</p>} */}
+        {/* </section> */}
       </section>
     </>
   );

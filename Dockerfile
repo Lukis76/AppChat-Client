@@ -38,6 +38,15 @@ COPY --from=build_image --chown=nextjs:nodejs /app/next.config.js ./
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
+ENV GOOGLE_CLIENT_ID="999338956671-93ma67gtiad33rh3ll1rqnnamhf7a1ah.apps.googleusercontent.com"
+ENV GOOGLE_CLIENT_SECRET="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"
+ENV DATABASE_URL="mongodb+srv://lucas:67p6L2BVKoZGeFeK@cluster0.6uhshd9.mongodb.net/ChatGraphQl"
+ENV NEXTAUTH_SECRET="LQZWmi6PNX9XKdN7ZI0EadKccqa30E2FdSBvk1HlBtc="
+ENV NEXTAUTH_URL="https://clientchat.fly.dev"
+ENV GRAPHQL_URI="https://backchat.fly.dev"
+ENV GRAPHQL_URI_SUB="wss://backchat.fly.dev"
+ENV PUBLIC_URL="https://clientchat.fly.dev"
+
 
 
 USER nextjs

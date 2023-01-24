@@ -1,17 +1,18 @@
 import { useMutation } from "@apollo/client";
 import { operations } from "graphQL/operations";
-import { Session } from "next-auth";
-import { FC, FormEvent, useState } from "react";
+import { FC, FormEvent, useContext, useState } from "react";
 import { toast } from "react-hot-toast";
 import ObjectID from "bson-objectid";
-import { SendMsgVar, MsgsData, MsgsVar } from "types";
+import { SendMsgVar, MsgsData, MsgsVar, User } from "types";
+import { authUserContext } from "@context/authContext";
 
 interface InputProps {
-  session: Session;
   conversationId: string;
 }
 
-export const Input: FC<InputProps> = ({ session, conversationId }) => {
+export const Input: FC<InputProps> = ({ conversationId }) => {
+  
+  const user = useContext(authUserContext).user as User | null;
   const [msg, setMsg] = useState<string>("");
 
   const [sendMsg] = useMutation<{ sendMsg: boolean }, SendMsgVar>(
@@ -26,7 +27,7 @@ export const Input: FC<InputProps> = ({ session, conversationId }) => {
     setMsg("");
     try {
       // send Msg Mutation
-      const senderId = session?.user?.id as string;
+      const senderId = user?.id as string;
       const newMsgId = ObjectID().toHexString();
       const newMsg: SendMsgVar = {
         id: newMsgId,
@@ -57,8 +58,8 @@ export const Input: FC<InputProps> = ({ session, conversationId }) => {
                 {
                   ...newMsg,
                   sender: {
-                    id: session?.user?.id as string,
-                    username: session.user.username,
+                    id: user?.id as string,
+                    username: user?.username as string,
                   },
                   createdAt: new Date(Date.now()),
                   updatedAt: new Date(Date.now()),

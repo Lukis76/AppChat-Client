@@ -1,8 +1,7 @@
 import { gql, useMutation } from "@apollo/client";
 import { operations } from "graphQL/operations";
-import { Session } from "next-auth";
 import { useRouter } from "next/router";
-import { ConversationParticipant } from "types";
+import { ConversationParticipant, User } from "types";
 
 export const useViewConversation = () => {
   const router = useRouter();
@@ -12,7 +11,7 @@ export const useViewConversation = () => {
   );
   ///////////////////////////////////////////////////////////
   return {
-    onViewConversation: async (conversationId: string, hasSeenLatestMsg: boolean, session: Session) => {
+    onViewConversation: async (conversationId: string, hasSeenLatestMsg: boolean, user: User | null ) => {
       //-------------------------------------------
       router.push({ query: { conversationId } });
       //-------------------------------------------
@@ -22,7 +21,7 @@ export const useViewConversation = () => {
         await conversationRead({
           //---------------------------
           variables: {
-            userId: session.user.id as string,
+            userId: user?.id as string,
             conversationId,
           },
           //---------------------------
@@ -51,7 +50,7 @@ export const useViewConversation = () => {
             if (!participantsFragment) return;
             //----------------------------------------------------------
             const participants = [...participantsFragment.participants];
-            const userParticipantIndex = participants.findIndex((p) => p.user.id === session.user.id);
+            const userParticipantIndex = participants.findIndex((p) => p.user.id === user?.id);
             //--------------------------------------
             if (userParticipantIndex === -1) return;
             //--------------------------------------

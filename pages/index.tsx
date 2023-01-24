@@ -4,15 +4,12 @@ import { Session } from 'next-auth'
 import { getSession, useSession } from 'next-auth/react'
 import Head from 'next/head'
 import { SvgLoading } from '@assets/svg'
-interface props {
-  data: Session
-}
+import { authUserContext } from '@context/authContext'
+import { useContext } from 'react'
 
-const Home: NextPage<props> = ({ data }) => {
-  console.log('ts son la props => ', data)
 
-  const { data: session } = useSession()
-  console.log('🚀 ~ file: index.tsx:17 ~ session', session)
+const Home: NextPage = () => {
+const { user } = useContext(authUserContext)
 
   return (
     <>
@@ -32,7 +29,7 @@ const Home: NextPage<props> = ({ data }) => {
         >
           SignIn
         </button> */}
-        <Chat session={data}/>
+        <Chat session={user}/>
       </main>
     </>
   )
@@ -40,21 +37,4 @@ const Home: NextPage<props> = ({ data }) => {
 
 export default Home
 
-export async function getServerSideProps(context: NextPageContext) {
-  const data = await getSession(context)
 
-  if (!data) {
-    return {
-      redirect: {
-        destination: '/auth',
-        permanent: false,
-      },
-    }
-  }
-
-  return {
-    props: {
-      data,
-    },
-  }
-}

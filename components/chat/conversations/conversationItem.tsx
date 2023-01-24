@@ -1,21 +1,22 @@
-import { Dispatch, FC, SetStateAction, useState } from "react";
-import { ConversationFE } from "types";
+import { Dispatch, FC, SetStateAction, useContext, useState } from "react";
+import { ConversationFE, User } from "types";
 import Image from "next/image";
 import { formatUsersName } from "@utils/helpFunctions";
 import ReactTimeAgo from "react-time-ago";
 import { useRouter } from "next/router";
-import { Session } from "next-auth";
 import { useViewConversation } from "@hook/useMutationAndOnViewConversation";
 import { ContextMenu } from "@components/chat/conversations/modal/contextMenu";
+import { authUserContext } from "@context/authContext";
 
 interface ConversationItemProps {
   conversation: ConversationFE;
-  session: Session;
   setEditingConversation: Dispatch<SetStateAction<ConversationFE | null>>;
   setIsOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export const ConversationItem: FC<ConversationItemProps> = ({ conversation, session, setEditingConversation, setIsOpen }) => {
+export const ConversationItem: FC<ConversationItemProps> = ({ conversation, setEditingConversation, setIsOpen }) => {
+  
+  const user = useContext(authUserContext).user as User | null;
   const router = useRouter();
   const conversationId = router?.query?.conversationId as string;
   const [contextMenu, setContextMenu] = useState<boolean>(false);
@@ -23,12 +24,12 @@ export const ConversationItem: FC<ConversationItemProps> = ({ conversation, sess
   const { onViewConversation } = useViewConversation();
 
   const getUserParticipant = (conversation: ConversationFE) => {
-    return Boolean(conversation.participants.find((p) => p.user.id === session.user.id)?.hasSeenLatestMsg);
+    return Boolean(conversation.participants.find((p) => p.user.id === user?.id)?.hasSeenLatestMsg);
   };
 
   const handleClick = (e: React.MouseEvent) => {
     if (e.type === "click") {
-      onViewConversation(conversation.id, getUserParticipant(conversation), session);
+      onViewConversation(conversation.id, getUserParticipant(conversation), user);
     } else if (e.type === "contextmenu") {
       e.preventDefault();
       setContextMenu(true);
@@ -68,7 +69,7 @@ export const ConversationItem: FC<ConversationItemProps> = ({ conversation, sess
       />
       <div className="flex flex-col justify-center items-center w-full">
         <div className="flex flex-row justify-between items-center w-full">
-          <p className="text-sm truncate">{formatUsersName(conversation.participants, session.user.id)}</p>
+          <p className="text-sm truncate">{formatUsersName(conversation.participants, user?.id)}</p>
           <span className="text-xs">
             <ReactTimeAgo date={Number(new Date(conversation.updatedAt))} timeStyle={"twitter"} />
           </span>

@@ -1,20 +1,20 @@
-import { FC, useEffect } from "react";
-import type { Session } from "next-auth";
+import { FC, useContext, useEffect } from "react";
 import { ConversationList } from "./conversationList";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { operations } from "graphQL/operations";
-import { ConversationCreatedSubscriptionData, ConversationData, ConversationUpdatedData, ConversationDeletedData, MsgsData } from "types";
+import { User, ConversationCreatedSubscriptionData, ConversationData, ConversationUpdatedData, ConversationDeletedData, MsgsData } from "types";
 import { useSubscriptionConversationDeleted } from "@hook/useSubscriptionConversationDeleted";
 import { useSubscription } from "@apollo/client";
 import { useRouter } from "next/router";
 import { useViewConversation } from "@hook/useMutationAndOnViewConversation";
+import { authUserContext } from "@context/authContext";
 
-interface ConversationWrapperProps {
-  session: Session;
-}
 
-export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) => {
+export const ConversationWrapper: FC = ( ) => {
+
   //--------------------------------------------------------------------------------
+
+  const user = useContext(authUserContext).user as User | null;
   const router = useRouter();
   const conversationId = router?.query?.conversationId as string;
   ///////////////////////// Query ///////////////////////////////
@@ -66,7 +66,7 @@ export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) =
         //       //------------------------------------------------------------
         if (conversationId === updateConversationId) {
           // router.replace(typeof "http://localhost:3000" === "string" ? "http://localhost:3000" : "");
-          onViewConversation(conversationId, false, session);
+          onViewConversation(conversationId, false, user);
         }
         //       //---------
         // return;
@@ -133,7 +133,7 @@ export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) =
   useEffect(() => {
     subscribeToMore({
       document: operations.conversation.Subscriptions.created,
-      updateQuery: (prev: any, { subscriptionData }: ConversationCreatedSubscriptionData) => {
+      updateQuery: (prev, { subscriptionData }: ConversationCreatedSubscriptionData) => {
         if (!subscriptionData.data) return prev;
 
         const newConversation = subscriptionData.data.conversationCreated;
@@ -148,7 +148,6 @@ export const ConversationWrapper: FC<ConversationWrapperProps> = ({ session }) =
   return (
     <div className=" bg-zinc-800 w-full max-w-xs  min-w-[16rem]">
       <ConversationList
-        session={session}
         conversations={conversationsData?.conversations || []}
         conversationsLoading={conversationsLoading}
       />

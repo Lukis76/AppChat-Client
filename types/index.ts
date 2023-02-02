@@ -4,43 +4,40 @@ import { Session } from "next-auth";
  *  User
  */
 export interface User {
-  id: string
-  email: string
-  token: string
-  username: string
-  image?: string
-
+	id?: string;
+	email?: string;
+	token?: string;
+	username?: string;
+	image?: string;
 }
-
-
 
 //------------------------------------------
 export interface AuthProps {
-  data: Session | null;
+	data: Session | null;
 }
 //------------------------------------------
 export interface CreateUsernameData {
-  createUsername: {
-    success: boolean;
-    error: string;
-  };
+	createUsername: {
+		success: boolean;
+		error: string;
+	};
 }
 //------------------------------------------
 export interface CreateUsernameVariables {
-  username: string;
+	username: string;
 }
 //-----------------------------------------
 export interface SearchUsersInput {
-  username: string;
+	username: string;
 }
 //-----------------------------------------
 export interface SearchUsersData {
-  searchUsers: Array<SearchUser>;
+	searchUsers: Array<SearchUser>;
 }
 //-----------------------------------------
 export interface SearchUser {
-  id: string;
-  username: string;
+	id: string;
+	username: string;
 }
 //-----------------------------------------
 /**
@@ -48,17 +45,17 @@ export interface SearchUser {
  */
 //------------------------------------------
 export interface ConversationData {
-  conversations: Array<ConversationFE>;
+	conversations: Array<ConversationFE>;
 }
 //------------------------------------------
 export interface CreateConversationData {
-  createConversation: {
-    conversationId: string;
-  };
+	createConversation: {
+		conversationId: string;
+	};
 }
 //------------------------------------------
 export interface CreateConversationInput {
-  participantIds: Array<string>;
+	participantIds: Array<string>;
 }
 //------------------------------------------
 /**
@@ -66,45 +63,45 @@ export interface CreateConversationInput {
  */
 //-----------------------------------------------------
 interface Conversation {
-  id: string;
-  latestMsgId: string;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	latestMsgId: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 //------------------------------------------------------
 export interface ConversationFE extends Conversation {
-  participants: Array<ConversationParticipant>;
-  latestMsg: MsgFE | null;
+	participants: Array<ConversationParticipant>;
+	latestMsg: MsgFE | null;
 }
 //-----------------------------------------------------
 export interface ConversationParticipant {
-  user: {
-    id: string;
-    username: string;
-  };
-  hasSeenLatestMsg: boolean;
+	user: {
+		id: string;
+		username: string;
+	};
+	hasSeenLatestMsg: boolean;
 }
 //----------------------------------------------------
 export interface ConversationCreatedSubscriptionData {
-  subscriptionData: {
-    data: {
-      conversationCreated: ConversationFE;
-    };
-  };
+	subscriptionData: {
+		data: {
+			conversationCreated: ConversationFE;
+		};
+	};
 }
 //----------------------------------------------------
 export interface ConversationUpdatedData {
-  conversationUpdated: {
-    conversation: Omit<ConversationFE, "latestMsg"> & { latestMsg: MsgFE };
-  };
-  addUserIds: Array<string> | null;
-  removeUserIds: Array<string> | null;
+	conversationUpdated: {
+		conversation: Omit<ConversationFE, "latestMsg"> & { latestMsg: MsgFE };
+	};
+	addUserIds: Array<string> | null;
+	removeUserIds: Array<string> | null;
 }
 //------------------------------------------------------
 export interface ConversationDeletedData {
-  conversationDeleted: {
-    id: string;
-  };
+	conversationDeleted: {
+		id: string;
+	};
 }
 //----------------------------------------------------
 
@@ -113,61 +110,45 @@ export interface ConversationDeletedData {
  */
 //--------------------------------------
 export interface Msg {
-  id: string;
-  conversationId: string;
-  senderId: string;
-  body: string;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	conversationId: string;
+	senderId: string;
+	body: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 //--------------------------------------
 export interface MsgFE {
-  id: string;
-  body: string;
-  sender: {
-    id: string;
-    username: string;
-  };
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	body: string;
+	sender: {
+		id: string;
+		username: string;
+	};
+	createdAt: Date;
+	updatedAt: Date;
 }
 //--------------------------------------
 export interface MsgsData {
-  msgs: Array<MsgFE>;
+	msgs: Array<MsgFE>;
 }
 //--------------------------------------
 export interface MsgsVar {
-  conversationId: string;
+	conversationId: string;
 }
 //--------------------------------------
 export interface SendMsgVar {
-  id: string;
-  conversationId: string;
-  senderId: string;
-  body: string;
+	id: string;
+	conversationId: string;
+	senderId: string;
+	body: string;
 }
 //--------------------------------------
 export interface MsgSubscriptionData {
-  subscriptionData: {
-    data: {
-      msgSend: MsgFE;
-    };
-  };
+	subscriptionData: {
+		data: {
+			msgSend: MsgFE;
+		};
+	};
 }
 //--------------------------------------
-//
-//
-//
-//
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
-

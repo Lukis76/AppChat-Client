@@ -16,50 +16,46 @@ import { GraphQLErrors } from "@apollo/client/errors";
 //
 //
 const REGISTER_USER = gql`
-  mutation Mutation($registerInput: RegisterInput) {
-    registerUser(registerInput: $registerInput) {
-      email
-      username
-      token
-    }
+ mutation Mutation($registerInput: RegisterInput) {
+  registerUser(registerInput: $registerInput) {
+    id
+    username
+    email
+    token
+
   }
+}
 `;
 
-
 const Auth: NextPage = (props) => {
-  const context = useContext(authUserContext)
-  const router = useRouter() 
-  const [errors, setErrors] = useState<GraphQLErrors>([])
+  const context = useContext(authUserContext);
+  const router = useRouter();
+  const [errors, setErrors] = useState<GraphQLErrors>([]);
 
-  function registerUserCallback() {
-    console.log("callback hit ====<<<<<<")
+  const registerUserCallback = () => registerUser();
 
-    registerUser()
-
-
-  }
-
-
-  const { onChange, onSubmit, values} = useForm(registerUserCallback, {
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
-
-  const [registerUser, { loading, error }] = useMutation(REGISTER_USER, {
-    update(proxy, {data: {registerUser: userData}}) {
-      context.login(userData)
-      router.push('/')
-
-    },
-    onError({ graphQLErrors }) {
-      setErrors(graphQLErrors)
-    },
-    variables: { registerInput: values }
+  const { onChange, onSubmit, values } = useForm(registerUserCallback, {
+    username: "",
+    email: "",
+    password: "",
+/*     confirmPassword: "", */
   });
 
+  const [registerUser, { loading, error }] = useMutation(REGISTER_USER, {
+    // update(proxy, { data: { registerUser: userData } }) {
 
+    //   // context.login(userData);
+
+    //   // router.push("/login");
+    // },
+    onError({ graphQLErrors }) {
+      setErrors(graphQLErrors);
+    },
+    // onCompleted() {
+    //   router.push('/login')
+    // },
+    variables: { registerInput: values },
+  });
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -79,27 +75,25 @@ const Auth: NextPage = (props) => {
   //     </div>
   //   );
   // }
+  
+    console.log("callback hit ====<<<<<< five", errors);
 
   return (
     <div className="bg-zinc-800 flex flex-col justify-center items-center min-h-screen w-full gap-4">
-
       <h3>Register</h3>
       <form className="flex flex-col gap-6 border-white border-2 p-8 rounded-2xl" onSubmit={onSubmit}>
         <input name="username" onChange={onChange} />
         <input name="email" onChange={onChange} />
         <input name="password" onChange={onChange} />
         <input name="confirmPassword" onChange={onChange} />
-        <button type="submit" className="text-center py-1 px-6 rounded-lg bg-blue-500 hover:opacity-30">Registrarse</button>
-        {
-        errors.map((err,index) => {
-          return <span key={index}>{err.message}</span>
-        })
-      }
+        <button type="submit" className="text-center py-1 px-6 rounded-lg bg-blue-500 hover:opacity-30">
+          Registrarse
+        </button>
+        {errors.map((err, index) => {
+          return <span key={index}>{err.message}</span>;
+        })}
       </form>
-
-
     </div>
   );
 };
 export default Auth;
-

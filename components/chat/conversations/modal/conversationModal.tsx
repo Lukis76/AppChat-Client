@@ -39,9 +39,9 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 	conversations,
 	editingConversation,
 }) => {
-	//----------------------------------------------------------------------------------------
+	//---------------------------------------------------------------------
 
-  const user = useContext(authUserContext).user as User | null;
+  const { user } = useContext(authUserContext)
 	const router: NextRouter = useRouter();
 	const userId = user?.id;
 	const [username, setUsername] = useState<string>("");
@@ -49,24 +49,25 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 	const [existConversation, setExistConversation] =
 		useState<ConversationFE | null>(null);
 	const { onViewConversation } = useViewConversation();
-	//--------------------------------------------------------------------------------------------------------------------------
+	//-----------------------------------------------------------------
 	const [
 		searchUsers,
 		{ data: dataSearch, loading: loadingSearch, error: searchUserError },
 	] = useLazyQuery<SearchUsersData, SearchUsersInput>(
 		operations.user.Queries.searchUsers,
 	);
-	//---------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------
 	const [createConversation, { loading: loadingCreateConversation }] =
 		useMutation<CreateConversationData, CreateConversationInput>(
 			operations.conversation.Mutations.createConversation,
 		);
-	//----------------------------------------------------------------------------------------------------------------------------------------
+	//----------------------------------------------------------------------
 	const [updateParticipants] = useMutation<
 		{ updateParticipants: boolean },
 		{ conversationId: string; participantIds: Array<string> }
 	>(operations.conversation.Mutations.updateParticipants);
-	const onSubmit = () => {
+	//-----------------------------------------------------------------------
+	const onCreatedRoom = () => {
 		console.log("dentro del on submit |??|?| => ", !participants.length);
 		if (!participants.length) return;
 
@@ -88,7 +89,7 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 			? onUpdateConversation(editingConversation)
 			: onCreateConversation();
 	};
-	//-----------------------------------------------------------------------------
+	//--------------------------------------------------------------------
 	const findExistConversation = (participantIds: Array<string>) => {
 		let existConversation: ConversationFE | null = null;
 
@@ -122,16 +123,18 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 	//---------------------------------------------------
 	const handleSubmitSearch = async (e: FormEvent) => {
 		e.preventDefault();
+		console.log('holis 👍')
 		searchUsers({ variables: { username } });
 	};
 	//---------------------------------------------------
 	const onCreateConversation = async () => {
 		const participantIds = [userId, ...participants.map((p) => p.id)] as [string];
-		console.log("holis ======> :))))");
+		console.log("holis ======> :))))", participantIds);
 		try {
 			const { data, errors } = await createConversation({
 				variables: { participantIds },
 			});
+			console.log('holis ======>>>> 🎱 despues del createConversation', data)
 
 			if (!data?.createConversation || errors) {
 				throw new Error("Filed to create conversation");
@@ -207,7 +210,7 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 	}, [editingConversation]);
 	//-----------------------------------------------------------------------
 	if (searchUserError) {
-		toast.error("Error searching for users");
+		toast.error(searchUserError.message.toString());
 		return null;
 	}
 	//-----------------------------------------------------------------------
@@ -274,7 +277,7 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 						<div className="flex justify-center items-center w-full">
 							<button
 								className="flex justify-center items-center text-center text-lg font-medium rounded-lg px-4 py-1 bg-blue-400 w-full"
-								onClick={onSubmit}
+								onClick={onCreatedRoom}
 							>
 								{loadingCreateConversation ? (
 									<SvgLoading size={24} />

@@ -12,7 +12,7 @@ import { authUserContext } from "@context/authContext";
 
 export const ConversationWrapper: FC = ( ) => {
 
-  //--------------------------------------------------------------------------------
+  //---------------------------------------------------------
 
   const user = useContext(authUserContext).user as User | null;
   const router = useRouter();

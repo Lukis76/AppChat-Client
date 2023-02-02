@@ -14,6 +14,7 @@ export const FeedWrapper: FC = () => {
   const { conversationId } = router.query;
 
   const { data } = useQuery<ConversationData, null>(operations.conversation.Queries.conversations);
+  console.log("data feed wrapper ===>> ", data);
 
   const conversation = data?.conversations.find((conversation) => conversation.id === conversationId);
 

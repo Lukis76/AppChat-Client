@@ -144,6 +144,7 @@ export const ConversationWrapper: FC = ( ) => {
       },
     });
   }, []);
+  console.log('conversation data wrapper ==>> ', conversationsData?.conversations)
   //////////////////////////////////////////////////////////////////////////////
   return (
     <div className=" bg-zinc-800 w-full max-w-xs  min-w-[16rem]">

@@ -7,17 +7,20 @@ import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 // import es from 'javascript-time-ago/locale/es-AR.json'
 import { AuthUserProvider } from "context/authContext";
+import { Refresh } from "@components/refresh";
 
 // TimeAgo.addDefaultLocale(en)
 TimeAgo.addLocale(en);
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   return (
-    <ApolloProvider client={client}>
-      <AuthUserProvider>
-        <Component {...pageProps} />
-        <Toaster />
-      </AuthUserProvider>
-    </ApolloProvider>
+    <AuthUserProvider>
+      <ApolloProvider client={client}>
+        <Refresh>
+          <Component {...pageProps} />
+          <Toaster />
+        </Refresh>
+      </ApolloProvider>
+    </AuthUserProvider>
   );
 }

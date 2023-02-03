@@ -1,16 +1,15 @@
-import { useMutation } from '@apollo/client';
-import { TypeState } from '@components/chat/conversations/modal/conversationModal';
-import { operations } from 'graphQL/operations';
-import { Dispatch, SetStateAction } from 'react'
-import { toast } from 'react-hot-toast';
-import { ConversationFE, SearchUser } from 'types';
+import { useMutation } from "@apollo/client";
+import { TypeState } from "@components/chat/conversations/modal/conversationModal";
+import { operations } from "graphQL/operations";
+import { Dispatch, SetStateAction } from "react";
+import { toast } from "react-hot-toast";
+import { ConversationFE, SearchUser } from "types";
 
 export const useUpdateConversation = (
   participants: Array<SearchUser>,
   setState: Dispatch<SetStateAction<TypeState>>,
   close: Dispatch<SetStateAction<boolean>>
 ) => {
-
   const [updateParticipants] = useMutation<
     { updateParticipants: boolean },
     { conversationId: string; participantIds: Array<string> }
@@ -30,25 +29,18 @@ export const useUpdateConversation = (
         throw new Error("Failed updating participants");
       }
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         participants: [],
-        username: '',
-      }))
+        username: "",
+      }));
 
       close((state) => !state);
     } catch (err) {
-      console.log("On Updated Conversation to participants Error", err);
+      console.error("On Updated Conversation to participants Error", err);
       toast.error("Failed to updated Participants");
     }
   };
 
-
-
-
-
-
-
-  return { onUpdateConversation }
-}
-
+  return { onUpdateConversation };
+};

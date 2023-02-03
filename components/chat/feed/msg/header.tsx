@@ -1,5 +1,5 @@
 import SvgBack from "@assets/svg/svgBack";
-import { authUserContext } from "@context/authContext";
+import { authUserContext } from "@context/authUserContext";
 import { useRouter } from "next/router";
 import { FC, useContext } from "react";
 import { ConversationFE, User } from "types";

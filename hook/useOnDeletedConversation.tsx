@@ -18,7 +18,9 @@ export const useOnDeletedConversation = () => {
         deleteConversation({
           variables: { conversationId },
           update: () => {
-            router.replace(typeof process.env.PUBLIC_URL === "string" ? process.env.PUBLIC_URL : "");
+            router.replace(
+              typeof process.env.PUBLIC_URL === "string" ? process.env.PUBLIC_URL : ""
+            );
           },
         }),
         {
@@ -28,7 +30,7 @@ export const useOnDeletedConversation = () => {
         }
       );
     } catch (err) {
-      console.log("Deleted conversation Error", err);
+      console.error("Deleted conversation Error", err);
     }
   };
   //-------------------------------

@@ -3,8 +3,7 @@ import { ConversationList } from "./conversationList";
 import { useQuery } from "@apollo/client";
 import { operations } from "graphQL/operations";
 import { ConversationCreatedSubscriptionData, ConversationData } from "types";
-import { useSubscriptionConversationDeleted } from "@hook/useSubscriptionConversationDeleted";
-import { useAddAndRemoveUser } from "@hook/useAddAndRemoveUser";
+import { useSubsConversationDelete, useAddAndRemoveUser } from "hook";
 
 export const ConversationWrapper: FC = () => {
   ///////////////////////// Query ///////////////////////////////
@@ -15,10 +14,10 @@ export const ConversationWrapper: FC = () => {
   } = useQuery<ConversationData, null>(operations.conversation.Queries.conversations);
   ////////////////////////////////////////////////////////////////////////////////////
   //subscription add user and remove user
-  useAddAndRemoveUser()
+  useAddAndRemoveUser();
   ///////////////////////////////////////////////////////
   // Subscription Deleted Conversation
-  useSubscriptionConversationDeleted();
+  useSubsConversationDelete();
   ///////////////////////////////////////////////
   useEffect(() => {
     subscribeToMore({

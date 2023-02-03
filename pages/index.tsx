@@ -1,7 +1,7 @@
 import { Chat } from "@components/chat/chat";
 import Head from "next/head";
 import { SvgLoading } from "@assets/svg";
-import { authUserContext } from "@context/authContext";
+import { authUserContext } from "@context/authUserContext";
 import { useContext, useEffect } from "react";
 import { useRouter } from "next/router";
 import { NextPage } from "next";
@@ -9,7 +9,6 @@ import { NextPage } from "next";
 const Home: NextPage = () => {
   const router = useRouter();
   const { user } = useContext(authUserContext);
-  console.log("🚀 ~ file: index.tsx:13 ~ Home ~ user", user)
 
   useEffect(() => {
     if (!user?.id) {

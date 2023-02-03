@@ -3,7 +3,7 @@ import { useSubscription } from "@apollo/client";
 import { operations } from "graphQL/operations";
 import { useRouter } from "next/router";
 
-export const useSubscriptionConversationDeleted = () => {
+export const useSubsConversationDelete = () => {
   ///////////////////////////////////////////////////////
   const router = useRouter();
   ///////////////////////////////////////////////

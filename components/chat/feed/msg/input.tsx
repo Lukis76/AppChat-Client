@@ -4,14 +4,13 @@ import { FC, FormEvent, useContext, useState } from "react";
 import { toast } from "react-hot-toast";
 import ObjectID from "bson-objectid";
 import { SendMsgVar, MsgsData, MsgsVar, User } from "types";
-import { authUserContext } from "@context/authContext";
+import { authUserContext } from "@context/authUserContext";
 
 interface InputProps {
   conversationId: string;
 }
 
 export const Input: FC<InputProps> = ({ conversationId }) => {
-  
   const user = useContext(authUserContext).user as User | null;
   const [msg, setMsg] = useState<string>("");
 
@@ -75,7 +74,7 @@ export const Input: FC<InputProps> = ({ conversationId }) => {
         throw new Error("failed to send Msg");
       }
     } catch (err: any) {
-      console.log("handleSubmit > onSendMsg > Error 💣 💥 => ", err);
+      console.error("handleSubmit > onSendMsg > Error 💣 💥 => ", err);
       toast.error(err?.message);
     }
   };

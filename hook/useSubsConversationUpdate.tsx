@@ -1,10 +1,9 @@
-import { Session } from "next-auth";
-import { ConversationUpdatedData } from "types";
+import { ConversationUpdatedData, User } from "types";
 import { useSubscription } from "@apollo/client";
 import { operations } from "graphQL/operations";
-import { useViewConversation } from "./useMutationAndOnViewConversation";
+import { useViewConversation } from "./useViewConversation";
 
-export const useSubscriptionConversationUpdate = (session: Session, conversationId: string) => {
+export const useSubsConversationUpdate = (user: User, conversationId: string) => {
   ///////////////////////////////////////////////////////////////////////////////////////////////
   const { onViewConversation } = useViewConversation();
   ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,10 +14,10 @@ export const useSubscriptionConversationUpdate = (session: Session, conversation
       if (!data.data) return;
       //----------------------------
       if (data.data.removeUserIds && data.data.removeUserIds.length) {
-        const isRemoved = data.data.removeUserIds.find((id) => id === session.user.id);
+        const isRemoved = data.data.removeUserIds.find((id) => id === user.id);
       }
       if (conversationId === data.data.conversationUpdated.conversation.id) {
-        onViewConversation(conversationId, false, session);
+        onViewConversation(conversationId, false, user);
       }
     },
   });

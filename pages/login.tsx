@@ -1,7 +1,7 @@
 import { useMutation } from "@apollo/client";
 import { GraphQLErrors } from "@apollo/client/errors";
-import { authUserContext } from "@context/authContext";
-import { useForm } from "@hook/useHookAuth";
+import { authUserContext } from "@context/authUserContext";
+import { useForm } from "hook";
 import gql from "graphql-tag";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -20,12 +20,11 @@ const LOGIN_USER = gql`
 
 const Login: NextPage = () => {
   const router = useRouter();
-  
-  if(typeof window !== 'undefined') {
-    if(localStorage.getItem('token')) {
-      router.reload()
-    }
 
+  if (typeof window !== "undefined") {
+    if (localStorage.getItem("token")) {
+      router.reload();
+    }
   }
 
   const context = useContext(authUserContext);
@@ -42,12 +41,10 @@ const Login: NextPage = () => {
 
   const [loginUser, { loading }] = useMutation(LOGIN_USER, {
     update(proxy, { data: { loginUser: userData } }) {
-      console.log("🚀 ~ file: login.tsx:36 ~ update ~ userData", userData);
-      console.log("🚀 ~ file: login.tsx:36 ~ update ~ proxy", proxy);
       context.login(userData);
     },
     onCompleted() {
-      router.replace('/login', '/');
+      router.replace("/login", "/");
     },
     onError({ graphQLErrors }) {
       setErrors(graphQLErrors);

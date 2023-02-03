@@ -1,20 +1,17 @@
 import { useQuery } from "@apollo/client";
 import { SkeletonMsgsList } from "@components/chat/skeleton";
-import { authUserContext } from "@context/authContext";
+import { authUserContext } from "@context/authUserContext";
 import { operations } from "graphQL/operations";
 import { FC, useContext, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { MsgsData, MsgsVar, MsgSubscriptionData, User } from "types";
 import { MessageItem } from "./messageItem";
 
-
 interface MessagesProps {
   conversationId: string;
 }
 
 export const Messages: FC<MessagesProps> = ({ conversationId }) => {
-
-
   const user = useContext(authUserContext).user as User | null;
 
   const { data, loading, error, subscribeToMore } = useQuery<MsgsData, MsgsVar>(
@@ -43,8 +40,6 @@ export const Messages: FC<MessagesProps> = ({ conversationId }) => {
       },
     });
   }, [conversationId]);
-
-  console.log("HERE SUBSCRIPTION DATA 🦓 💤 => ", data);
 
   if (error) {
     toast.error("Error fetching msg");

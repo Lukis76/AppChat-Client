@@ -1,22 +1,21 @@
 import { useQuery } from "@apollo/client";
 import { operations } from "graphQL/operations";
-import { useRouter } from "next/router"
+import { useRouter } from "next/router";
 import type { FC } from "react";
 import { ConversationData } from "types";
 import { Header } from "./msg/header";
 import { Input } from "./msg/input";
 import { Messages } from "./msg/messages";
 
-
-
 export const FeedWrapper: FC = () => {
   const router = useRouter();
   const { conversationId } = router.query;
 
   const { data } = useQuery<ConversationData, null>(operations.conversation.Queries.conversations);
-  console.log("data feed wrapper ===>> ", data);
 
-  const conversation = data?.conversations.find((conversation) => conversation.id === conversationId);
+  const conversation = data?.conversations.find(
+    (conversation) => conversation.id === conversationId
+  );
 
   return (
     <div className="flex flex-col justify-center items-center h-screen w-full overscroll-none">
@@ -27,7 +26,9 @@ export const FeedWrapper: FC = () => {
           <Input conversationId={conversationId} />
         </div>
       ) : (
-        <div className="flex justify-center items-center h-screen w-full">seleciona una conversacion</div>
+        <div className="flex justify-center items-center h-screen w-full">
+          seleciona una conversacion
+        </div>
       )}
     </div>
   );

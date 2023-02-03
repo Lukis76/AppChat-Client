@@ -1,11 +1,10 @@
-import React, { useContext } from 'react'
-
+import { useContext } from 'react'
 import { useSubscription } from "@apollo/client";
 import { authUserContext } from '@context/authUserContext';
 import { operations } from 'graphQL/operations';
 import { ConversationData, ConversationUpdatedData, MsgsData, User } from 'types';
 import { useRouter } from 'next/router';
-import { useViewConversation } from './useMutationAndOnViewConversation';
+import { useViewConversation } from '.';
 
 export const useAddAndRemoveUser = () => {
   const router = useRouter();
@@ -61,6 +60,7 @@ export const useAddAndRemoveUser = () => {
 
             //---------------------------
             if (!dataConversation) return;
+
             //---------------------------
             client.writeQuery({
               query: operations.conversation.Queries.conversations,

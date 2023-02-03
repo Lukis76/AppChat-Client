@@ -6,12 +6,17 @@ import { ConversationParticipant, User } from "types";
 export const useViewConversation = () => {
   const router = useRouter();
   /////////////////////////////////////////////////////////
-  const [conversationRead] = useMutation<{ conversationRead: boolean }, { userId: string; conversationId: string }>(
-    operations.conversation.Mutations.conversationRead
-  );
+  const [conversationRead] = useMutation<
+    { conversationRead: boolean },
+    { userId: string; conversationId: string }
+  >(operations.conversation.Mutations.conversationRead);
   ///////////////////////////////////////////////////////////
   return {
-    onViewConversation: async (conversationId: string, hasSeenLatestMsg: boolean, user: User | null ) => {
+    onViewConversation: async (
+      conversationId: string,
+      hasSeenLatestMsg: boolean,
+      user: User | null
+    ) => {
       //-------------------------------------------
       router.push({ query: { conversationId } });
       //-------------------------------------------
@@ -72,9 +77,7 @@ export const useViewConversation = () => {
             });
           },
         });
-      } catch (err) {
-        console.log("on view conversation error", err);
-      }
+      } catch (err) {}
     },
   };
 };

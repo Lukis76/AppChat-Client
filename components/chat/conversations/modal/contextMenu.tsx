@@ -1,4 +1,4 @@
-import { useOnDeletedConversation } from "@hook/useOnDeletedConversation";
+import { useOnDeletedConversation } from "hook";
 import { Dispatch, FC, SetStateAction } from "react";
 import { ConversationFE } from "types";
 
@@ -10,7 +10,13 @@ interface ContextMenuProps {
   setIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export const ContextMenu: FC<ContextMenuProps> = ({ close, conversationId, setEditingConversation, conversation, setIsOpen }) => {
+export const ContextMenu: FC<ContextMenuProps> = ({
+  close,
+  conversationId,
+  setEditingConversation,
+  conversation,
+  setIsOpen,
+}) => {
   const { onConversationDeleted } = useOnDeletedConversation();
 
   return (
@@ -21,10 +27,6 @@ export const ContextMenu: FC<ContextMenuProps> = ({ close, conversationId, setEd
           setEditingConversation(null);
           close(false);
         }}
-        // onMouseLeave={(e: MouseEvent) => {
-        //   e.preventDefault();
-        //   close(false);
-        // }}
       />
       <div className="absolute top-1/2 left-1/3 rounded-md bg-zinc-800 flex flex-col justify-center items-center z-20 w-full max-w-[8rem] border-white border-[1px] border-opacity-80">
         <button

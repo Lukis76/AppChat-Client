@@ -4,7 +4,7 @@ import Image from "next/image";
 import { formatUsersName } from "@utils/helpFunctions";
 import ReactTimeAgo from "react-time-ago";
 import { useRouter } from "next/router";
-import { useViewConversation } from "@hook/useMutationAndOnViewConversation";
+import { useViewConversation } from "hook";
 import { ContextMenu } from "@components/chat/conversations/modal/contextMenu";
 import { authUserContext } from "@context/authUserContext";
 

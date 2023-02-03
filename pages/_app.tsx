@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 // import es from 'javascript-time-ago/locale/es-AR.json'
-import { AuthUserProvider } from "context/authContext";
+import { AuthUserProvider } from "context/authUserProvider";
 import { Refresh } from "@components/refresh";
 
 // TimeAgo.addDefaultLocale(en)

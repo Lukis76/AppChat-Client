@@ -1,11 +1,9 @@
 import { Participants } from "./participants";
 import { UserSearchList } from "./useSearchList";
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client";
 import { SvgLoading } from "@assets/svg";
 import { useViewConversation } from "@hook/index";
 import { operations } from "graphQL/operations";
-import { ErrorMessage, Message } from "graphql-ws";
-import { NextRouter, useRouter } from "next/router";
 import {
 	Dispatch,
 	FC,
@@ -19,20 +17,24 @@ import { toast } from "react-hot-toast";
 import {
 	ConversationFE,
 	ConversationParticipant,
-	CreateConversationData,
-	CreateConversationInput,
 	SearchUser,
 	SearchUsersData,
 	SearchUsersInput,
-  User
 } from "types";
-import { authUserContext } from "@context/authContext";
+import { authUserContext } from "@context/authUserContext";
+import { useRoom } from "@hook/useRoom";
 
 interface ConversationModalProps {
 	close: Dispatch<SetStateAction<boolean>>;
 	conversations: Array<ConversationFE>;
 	editingConversation: ConversationFE | null;
 }
+
+export type TypeState = {
+  username: string,
+  participants: Array<SearchUser>,
+  existConversation: ConversationFE | null
+} 
 
 export const ConversationModal: FC<ConversationModalProps> = ({
 	close,
@@ -42,12 +44,16 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 	//---------------------------------------------------------------------
 
   const { user } = useContext(authUserContext)
-	const router: NextRouter = useRouter();
 	const userId = user?.id;
-	const [username, setUsername] = useState<string>("");
-	const [participants, setParticipants] = useState<Array<SearchUser>>([]);
-	const [existConversation, setExistConversation] =
-		useState<ConversationFE | null>(null);
+
+
+  const [state, setState] = useState<TypeState>({
+    username: "",
+    participants: [],
+    existConversation: null
+  })
+
+
 	const { onViewConversation } = useViewConversation();
 	//-----------------------------------------------------------------
 	const [
@@ -57,154 +63,52 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 		operations.user.Queries.searchUsers,
 	);
 	//----------------------------------------------------------------------
-	const [createConversation, { loading: loadingCreateConversation }] =
-		useMutation<CreateConversationData, CreateConversationInput>(
-			operations.conversation.Mutations.createConversation,
-		);
+
 	//----------------------------------------------------------------------
-	const [updateParticipants] = useMutation<
-		{ updateParticipants: boolean },
-		{ conversationId: string; participantIds: Array<string> }
-	>(operations.conversation.Mutations.updateParticipants);
 	//-----------------------------------------------------------------------
-	const onCreatedRoom = () => {
-		console.log("dentro del on submit |??|?| => ", !participants.length);
-		if (!participants.length) return;
-
-		const participantIds = participants.map((p) => p.id);
-		console.log("destro del onsubmit ==> ", participantIds);
-
-		const exist = findExistConversation(participantIds);
-
-		console.log("dentro del onsubmit =>", exist);
-
-		if (exist) {
-			toast("Conversation already exists");
-			setExistConversation(exist);
-			return;
-		}
-		console.log("dentro on Submit => fin ", editingConversation);
-
-		editingConversation
-			? onUpdateConversation(editingConversation)
-			: onCreateConversation();
-	};
-	//--------------------------------------------------------------------
-	const findExistConversation = (participantIds: Array<string>) => {
-		let existConversation: ConversationFE | null = null;
-
-		for (const conversation of conversations) {
-			const addParticipants = conversation.participants.filter(
-				(p) => p.user.id !== userId,
-			);
-
-			if (addParticipants.length !== participantIds.length) continue;
-
-			let allMathchingParticipants: boolean = false;
-
-			for (const participant of addParticipants) {
-				const foundParticipant = participantIds.find(
-					(p) => p === participant.user.id,
-				);
-
-				if (!foundParticipant) {
-					allMathchingParticipants = false;
-					break;
-				}
-
-				allMathchingParticipants = true;
-			}
-			if (allMathchingParticipants) {
-				existConversation = conversation;
-			}
-		}
-		return existConversation;
-	};
-	//---------------------------------------------------
+		//--------------------------------------------------------------------
+  const { onCreatedRoom, loadingCreateConversation } = useRoom(conversations, state, setState, close)
+		//---------------------------------------------------
 	const handleSubmitSearch = async (e: FormEvent) => {
 		e.preventDefault();
 		console.log('holis 👍')
-		searchUsers({ variables: { username } });
+		searchUsers({ variables: { username: state.username } });
 	};
 	//---------------------------------------------------
-	const onCreateConversation = async () => {
-		const participantIds = [userId, ...participants.map((p) => p.id)] as [string];
-		console.log("holis ======> :))))", participantIds);
-		try {
-			const { data, errors } = await createConversation({
-				variables: { participantIds },
-			});
-			console.log('holis ======>>>> 🎱 despues del createConversation', data)
-
-			if (!data?.createConversation || errors) {
-				throw new Error("Filed to create conversation");
-			}
-
-			const { conversationId } = data?.createConversation;
-
-			router.push({
-				query: { conversationId },
-			});
-
-			setParticipants([]);
-			setUsername("");
-			close((state) => !state);
-		} catch (err) {
-			console.log("on created session room => ", err);
-			if (err instanceof Error) {
-				toast.error(err.message);
-			}
-		}
-	};
-	//------------------------------------------------------------
-	const onUpdateConversation = async (conversation: ConversationFE) => {
-		const participantIds = participants.map((p) => p.id);
-		try {
-			const { data, errors } = await updateParticipants({
-				variables: {
-					conversationId: conversation.id,
-					participantIds,
-				},
-			});
-
-			if (!data?.updateParticipants || errors) {
-				throw new Error("Failed updating participants");
-			}
-
-			setParticipants([]);
-			setUsername("");
-			close((state) => !state);
-		} catch (err) {
-			console.log("On Updated Conversation to participants Error", err);
-			toast.error("Failed to updated Participants");
-		}
-	};
-	//-----------------------------------------------
+		//------------------------------------------------------------
+		//-----------------------------------------------
 
 	const addParticipant = (user: SearchUser) => {
-		setParticipants((state) => [...state, user]);
-		setUsername("");
+		setState(prev => ({ 
+      ...prev,
+      username: '',
+      participants: [...prev.participants, user]}));
 	};
 	//-------------------------------------------------------------------
 
 	const removeParticipant = (userId: string) => {
-		setParticipants((state) => state.filter((u) => u.id !== userId));
+		setState(prev => ({
+      ...prev,
+      participants: prev.participants.filter((u) => u.id !== userId)}));
 	};
 	//-------------------------------------------------------------------
 	const onConversationClick = () => {
-		if (!existConversation) return;
+		if (!state.existConversation) return;
 
-		const { hasSeenLatestMsg } = existConversation.participants.find(
+		const { hasSeenLatestMsg } = state.existConversation.participants.find(
 			(p) => p.user.id === userId,
 		) as ConversationParticipant;
 
-		onViewConversation(existConversation.id, hasSeenLatestMsg, user);
+		onViewConversation(state.existConversation.id, hasSeenLatestMsg, user);
 		close((state) => !state);
 	};
 	//-----------------------------------------------------------------------
 	useEffect(() => {
-		if (editingConversation) {
-			setParticipants(editingConversation.participants.map((p) => p.user));
+		if (state.existConversation) {
+			setState(prev => ({
+        ...prev,
+        participants: prev.existConversation ? prev.existConversation.participants.map((p) => p.user) : []
+      }));
 			return;
 		}
 	}, [editingConversation]);
@@ -220,8 +124,11 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 			<button
 				className="fixed w-screen h-screen top-0 left-0"
 				onClick={() => {
-					setUsername("");
-					setParticipants([]);
+					setState(prev => ({
+            ...prev,
+            username: '',
+            participants: [],
+          }));
 					close((state) => !state);
 				}}
 			/>
@@ -229,8 +136,12 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 				<button
 					className="bg-red-500 opacity-70 p-2 rounded-lg absolute top-2 right-2 hover:opacity-100 ease duration-75"
 					onClick={() => {
-						setUsername("");
-						setParticipants([]);
+						
+					setState(prev => ({
+            ...prev,
+            username: '',
+            participants: [],
+          }));
 						close((state) => !state);
 					}}
 				>
@@ -245,14 +156,14 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 				>
 					<input
 						type="text"
-						value={username}
+						value={state.username}
 						placeholder="insert"
-						onChange={(e) => setUsername(e.target.value)}
+						onChange={(e) => setState(prev => ({...prev, username: e.target.value}))}
 						className="px-2 py-1 rounded-md focus:bg-zinc-800 bg-zinc-900 border-zinc-700 border-2 text-lg w-full"
 					/>
 					<button
 						type="submit"
-						disabled={!username}
+						disabled={!state.username}
 						className="flex justify-center items-center bg-zinc-800 w-full py-1 px-4 text-lg rounded-md disabled:opacity-30 hover:bg-zinc-700 ease duration-100"
 					>
 						{loadingSearch ? <SvgLoading size={24} /> : "search"}
@@ -264,11 +175,11 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 						addParticipant={addParticipant}
 					/>
 				)}
-				{participants.length !== 0 && (
+				{state.participants.length !== 0 && (
 					<>
-						{participants.length > 2 ? (
+						{state.participants.length > 2 ? (
 							<Participants
-								participants={participants}
+								participants={state.participants}
 								removeParticipant={removeParticipant}
 							/>
 						) : (
@@ -277,7 +188,7 @@ export const ConversationModal: FC<ConversationModalProps> = ({
 						<div className="flex justify-center items-center w-full">
 							<button
 								className="flex justify-center items-center text-center text-lg font-medium rounded-lg px-4 py-1 bg-blue-400 w-full"
-								onClick={onCreatedRoom}
+								onClick={() => onCreatedRoom(editingConversation)}
 							>
 								{loadingCreateConversation ? (
 									<SvgLoading size={24} />

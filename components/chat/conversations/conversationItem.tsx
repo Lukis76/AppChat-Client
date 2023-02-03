@@ -6,7 +6,7 @@ import ReactTimeAgo from "react-time-ago";
 import { useRouter } from "next/router";
 import { useViewConversation } from "@hook/useMutationAndOnViewConversation";
 import { ContextMenu } from "@components/chat/conversations/modal/contextMenu";
-import { authUserContext } from "@context/authContext";
+import { authUserContext } from "@context/authUserContext";
 
 interface ConversationItemProps {
   conversation: ConversationFE;
@@ -15,7 +15,7 @@ interface ConversationItemProps {
 }
 
 export const ConversationItem: FC<ConversationItemProps> = ({ conversation, setEditingConversation, setIsOpen }) => {
-  
+
   const user = useContext(authUserContext).user as User | null;
   const router = useRouter();
   const conversationId = router?.query?.conversationId as string;
@@ -38,9 +38,8 @@ export const ConversationItem: FC<ConversationItemProps> = ({ conversation, setE
 
   return (
     <div
-      className={`relative flex flex-row justify-between items-center w-full pr-4 pl-2 py-2 bg-zinc-700 hover:bg-zinc-600  text-zinc-300 rounded-lg ease duration-75 cursor-pointer gap-4 ${
-        conversation.id === conversationId && "bg-zinc-600"
-      }`}
+      className={`relative flex flex-row justify-between items-center w-full pr-4 pl-2 py-2 bg-zinc-700 hover:bg-zinc-600  text-zinc-300 rounded-lg ease duration-75 cursor-pointer gap-4 ${conversation.id === conversationId && "bg-zinc-600"
+        }`}
       onClick={(e) => {
         // router.push({ query: { conversationId: conversation.id } });
         handleClick(e);

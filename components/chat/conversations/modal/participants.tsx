@@ -1,5 +1,4 @@
 import type { FC } from "react";
-import { toast } from "react-hot-toast";
 import { SearchUser } from "types";
 
 interface ParticipantsProps {

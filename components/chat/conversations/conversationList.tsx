@@ -1,11 +1,9 @@
-import type { Session } from "next-auth";
 import { FC, useState } from "react";
 import { ConversationModal } from "./modal/conversationModal";
-import { ConversationFE, User } from "types";
+import { ConversationFE } from "types";
 import { ConversationItem } from "./conversationItem";
 import { signOut } from "next-auth/react";
 import { SkeletonConversationList } from "../skeleton"
-import { conversation } from "graphQL/operations/conversation";
 
 interface ConversationListProps {
   conversations: Array<ConversationFE>;
